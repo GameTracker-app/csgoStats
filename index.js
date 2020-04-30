@@ -153,8 +153,7 @@ class csgoStatsNode {
     return kd;
   }
 
-  // Will Return a Steam64 ID if a valid URL is supplied,
-  // otherwise it will return the same input back.
+  // Return a Valid Steam64 ID by resolving custom user ID.
   getSteamID(vanityURL, cb) {
     if (typeof cb === 'function') {
       this.callAPI(vanityURL, "vanityURL", (err, data) => {

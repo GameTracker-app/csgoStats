@@ -30,7 +30,8 @@ const cStats = new csgoStats({"apikey":"<Put your Steam API key here >"});
 Here is an example of getting a players K/D
 
 ```js
-csStats.whatIsMyKD('76561198138999275', function(data){
+// Kills, Deaths
+csStats.getKD(7656, 8221, function(data){
   console.log("Your K/D is: " + data);
 })
 ```
@@ -38,7 +39,7 @@ csStats.whatIsMyKD('76561198138999275', function(data){
 Here is another example of getting a players Steam ID from their vanity URL
 
 ```js
-csStats.getMySteamID('xserv', function(data){
+csStats.getSteamID('xserv', function(data){
   console.log("Your Steam ID is: " + data);
 });
 ```
@@ -74,7 +75,7 @@ All Functions will return a Promise if a callback function is not supplied as a 
 * **getProfilePic(steamID)** - Uses the Data from *getProfile* and pulls your full size (184x184) profile image URL.
 * **getKD(kills, deaths)** - Basic function that calculates your CS:GO K/D to 2 dp (decimal Point).
 * **getSteamID(vanityURL)** - Using a players vanity URL this functions will return the Steam ID.
-* **getMyBans(steamID)** - Get all bans from Steam eg: VAC Bans, Community Bans and Economy Bans.
+* **getBans(steamID)** - Get all bans from Steam eg: VAC Bans, Community Bans and Economy Bans.
 * **hasVac(steamID)** - A simple function that takes the data from *getMyBans* and checks if the VACBanned key is true or false.
 
 ## Built With
@@ -83,7 +84,7 @@ All Functions will return a Promise if a callback function is not supplied as a 
 
 ## Authors
 
-* **GameTracker.app** - *Rework to V2 (Added Promise Support and code optimization)* - [GameTracker-app](https://gametracker.app)
+* **GameTracker.app** - *Rework to V2 (Added Promise Support and code optimization)* - [gametracker.app](https://gametracker.app?ref=github)
 * **KillerDucks** - *Initial work* - [KillerDucks](https://github.com/KillerDucks)
 
 See also the list of [contributors](https://github.com/KillerDucks/csgoStats/contributors) who participated in this project.

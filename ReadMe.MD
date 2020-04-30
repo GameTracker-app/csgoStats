@@ -57,28 +57,25 @@ const cStat = new csgoStats();
 
 >You can obtain one at https://steamcommunity.com/dev
 
-you can pass through options such as:
-
-* **quiet** - This will suppress any console.log() messages that the class makes. This can be set to **1** to suppress the messages.
-* **vanity** - This allows **just** vanity URL's to be used instead of Steam ID's. To use this set **vanity** to **true**.
-
-to set the options all you have to do is put a JSON object when creating the class instance
-
 ```js
-const cStat = new csgoStats({"quiet":"1", "vanity":"true", "apikey":"<Put your Steam API key here >"});
+const cStat = new csgoStats({"apikey":"<Put your Steam API key here >"});
 ```
 
 ### Available Commands
 
-All of these functions take the Steam ID or Vanity URL if the option is set with the exception of *getMySteamID* which only takes a Vanity URL
-* **getStats** - This by its-self will return all CS:GO related data eg: Kills with each weapon, MVP medals and Achievements.
-* **getProfile** - Gets all data relating to a players profile eg: Profile name, Profile Image, Last Logon Time, Game ID (If the player is
+All of these functions take the Steam64 ID. ( Which comprises of numbers only ). If you have a custom ID, then call the **getSteamID(customID)** function and it will return a valid Steam64 ID if a user exists.
+
+All Functions will return a Promise if a callback function is not supplied as a second argument. ( Callbacks in this release are now in a format of [err, data] to handle errors elegantly ).
+
+
+* **getStats(steamID)** - This by its-self will return all CS:GO related data eg: Kills with each weapon, MVP medals and Achievements.
+* **getProfile(steamID)** - Gets all data relating to a players profile eg: Profile name, Profile Image, Last Logon Time, Game ID (If the player is
                    playing a game).
-* **getProfilePic** - Uses the Data from *getProfile* and pulls your full size (184x184) profile image URL.
-* **whatIsMyKD** - Basic function that calculates your CS:GO K/D to 2 dp (decimal Point).
-* **getMySteamID** - Using a players vanity URL this functions will return the Steam ID.
-* **getMyBans** - Get all bans from Steam eg: VAC Bans, Community Bans and Economy Bans.
-* **isVac** - A simple function that takes the data from *getMyBans* and checks if the VACBanned key is true or false.
+* **getProfilePic(steamID)** - Uses the Data from *getProfile* and pulls your full size (184x184) profile image URL.
+* **getKD(kills, deaths)** - Basic function that calculates your CS:GO K/D to 2 dp (decimal Point).
+* **getSteamID(vanityURL)** - Using a players vanity URL this functions will return the Steam ID.
+* **getMyBans(steamID)** - Get all bans from Steam eg: VAC Bans, Community Bans and Economy Bans.
+* **hasVac(steamID)** - A simple function that takes the data from *getMyBans* and checks if the VACBanned key is true or false.
 
 ## Built With
 
@@ -86,6 +83,7 @@ All of these functions take the Steam ID or Vanity URL if the option is set with
 
 ## Authors
 
+* **GameTracker.app** - *Rework to V2 (Added Promise Support and code optimization)* - [GameTracker-app](https://gametracker.app)
 * **KillerDucks** - *Initial work* - [KillerDucks](https://github.com/KillerDucks)
 
 See also the list of [contributors](https://github.com/KillerDucks/csgoStats/contributors) who participated in this project.

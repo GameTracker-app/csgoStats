@@ -1,235 +1,216 @@
 const needle = require('needle');
-let quiet = 0; //All info messages are displayed if this equals 0
-let vanity = false; //All functions that dont use vanity will need a Steam ID when this is false if true ONLY vanityURL will be used
 let APIKey = ""; //Lmao not using my Steam API Key
 
 class csgoStatsNode {
 
-  constructor(opts){
-    if(opts['quiet'] == 1){
-      quiet = 1;
-    }
-    if(opts['vanity'] == "true"){
-      vanity = true;
-    }
-    if(opts['apikey'] == "" | opts['apikey'] == undefined){
-      console.log("You need a Steam API key to use this libary");
+  constructor(opts) {
+    if (opts['apikey'] == "" | opts['apikey'] == undefined) {
+      console.error("You need a Steam API key to use CsgoStatsNode Library.");
       process.exit(0);
     } else {
       APIKey = opts['apikey'];
     }
   }
 
-  makePost(steamID = '76561197960287930', type = 'csgoStats' ,cb){
+  callAPI(steamID = '', type = 'csgoStats', cb) {
     try {
       switch (type) {
-
         case "csgoStats":
-          needle.get('http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=' + APIKey + '&steamid='+ steamID, function(err, resp){
-            if(err) throw err;
-            if(quiet == 0){
-              console.log("csgoStatsNode-> Raw Data Callback");
+          needle.get('http://api.steampowered.com/ISteamUserStats/GetUserStatsForGame/v0002/?appid=730&key=' + APIKey + '&steamid=' + steamID, function (err, resp) {
+            if (err) return cb(err);
+            if (resp.statusCode === 200) {
+              return cb(null, resp.body);
+            } else {
+              return cb(new Error('API Request Failed'));
             }
-            cb(resp.body);
           });
           break;
 
         case "getBans":
-          needle.get('http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' + APIKey + '&steamids='+ steamID, function(err, resp){
-            if(err) throw err;
-            if(quiet == 0){
-              console.log("csgoStatsNode-> Ban Data Callback");
+          needle.get('http://api.steampowered.com/ISteamUser/GetPlayerBans/v1/?key=' + APIKey + '&steamids=' + steamID, function (err, resp) {
+            if (err) return cb(err);
+            if (resp.statusCode === 200) {
+              return cb(null, resp.body);
+            } else {
+              return cb(new Error('API Request Failed'));
             }
-            cb(resp.body);
           });
           break;
 
         case "getProfile":
-        needle.get('http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + APIKey + '&steamids='+ steamID, function(err, resp){
-          if(err) throw err;
-          if(quiet == 0){
-            console.log("csgoStatsNode-> Profile Data Callback");
-          }
-          cb(resp.body);
-        });
-        break;
+          needle.get('http://api.steampowered.com/ISteamUser/GetPlayerSummaries/v0002/?key=' + APIKey + '&steamids=' + steamID, function (err, resp) {
+            if (err) return cb(err);
+            if (resp.statusCode === 200) {
+              return cb(null, resp.body);
+            } else {
+              return cb(new Error('API Request Failed'));
+            }
+          });
+          break;
 
         case "vanityURL":
-        needle.get('http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=' + APIKey + '&vanityurl='+ steamID, function(err, resp){
-          if(err) throw err;
-          if(quiet == 0){
-            console.log("csgoStatsNode-> VanityURL to Steam ID Callback");
-          }
-          cb(resp.body);
-        });
-          break;
-      }
-    } catch (e) {
-      console.log(e);
-    }
-  }
-
-  getStats(steamID, cb){
-    /**
-      Main Class Purpose
-      Will take a steamID and retun all CSGO related data later versions of the class will have seperate functions
-      to get diffrent pieces of data
-    **/
-    if(vanity){
-      this.getMySteamID(steamID, (data) => {
-        this.makePost(data, undefined, (d7) => {
-          cb(d7);
-        })
-      });
-
-    } else {
-
-      this.makePost(steamID, undefined , (data) => {
-        cb(data);
-      });
-    }
-
-  }
-
-  getProfile(steamID, cb){
-    if(vanity){
-      this.getMySteamID(steamID, (sID) => {
-        this.makePost(sID, "getProfile" , (data) => {
-          cb(data['response']['players'][0]);
-        });
-      });
-    } else {
-      this.makePost(steamID, "getProfile" , (data) => {
-        cb(data['response']['players'][0]);
-      });
-    }
-  }
-
-  getProfilePromise(steamID, cb){
-    return new Promise( (resolve, reject) => {
-      if(vanity){
-        this.getMySteamID(steamID, (sID) => {
-          this.makePost(sID, "getProfile" , (data) => {
-            // cb(data['response']['players'][0]);
-            resolve(data['response']['players'][0]);
+          needle.get('http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=' + APIKey + '&vanityurl=' + steamID, function (err, resp) {
+            if (err) return cb(err);
+            if (resp.statusCode === 200) {
+              console.log(resp.body);
+              if (resp.body.response.success === 42) {
+                return cb(new Error('Invalid VanityURL'));
+              }
+              return cb(null, resp.body);
+            } else {
+              return cb(new Error('API Request Failed'));
+            }
           });
-        });
-      } else {
-        this.makePost(steamID, "getProfile" , (data) => {
-          // cb(data['response']['players'][0]);
-          resolve(data['response']['players'][0]);
-        });
+          break;
+
+        default:
+          return cb(new Error('Invalid Function Name Supplied'));
       }
-    });
-  }
-
-  getProfilePic(steamID, cb){
-    if(vanity){
-      this.getProfile(steamID, (data) => {
-        cb(data['avatarfull']);
-      });
-    } else {
-      this.getProfile(steamID, (data) => {
-        cb(data['avatarfull']);
-      });
+    } catch (error) {
+      return cb(error, null);
     }
   }
 
-  getProfileName(steamID, cb){
-    if(vanity){
-      this.getProfile(steamID, (data) => {
-        cb(data['personaname']);
-      });
+
+  /**
+    Main Class Purpose
+    Will take a steamID and retun all CSGO related data later versions of the class will have seperate functions
+    to get diffrent pieces of data
+  **/
+  getStats(sID, cb) {
+    if (typeof cb === 'function') {
+      // Callback function supplied
+      this.callAPI(sID, 'csgoStats', (err, d7) => {
+        if (err) return cb(err, null);
+        return cb(null, d7);
+      })
     } else {
-      this.getProfile(steamID, (data) => {
-        cb(data['personaname']);
-      });
-    }
-  }
-
-  whatIsMyKD(steamID, cb){
-    if(vanity){
-      this.getMySteamID(steamID, (sID) => {
-        this.makePost(sID, undefined , (data) => {
-          let x = data['playerstats']['stats'][0]['value'];
-          let y = data['playerstats']['stats'][1]['value'];
-          let kd = (x/y).toFixed(2);
-          cb(kd);
-        });
-      });
-    } else {
-      this.makePost(steamID, undefined , (data) => {
-        let x = data['playerstats']['stats'][0]['value'];
-        let y = data['playerstats']['stats'][1]['value'];
-        let kd = (x/y).toFixed(2);
-        cb(kd);
-      });
-    }
-  }
-
-  getMySteamID(vanityURL, cb){
-    this.makePost(vanityURL, "vanityURL" , (data) => {
-      cb(data['response']['steamid']);
-    });
-  }
-
-  getMyBans(steamID, cb){
-    if(vanity){
-      this.getMySteamID(steamID, (sID) => {
-        this.makePost(sID, "getBans", (data) => {
-          cb(data['players'][0]);
+      // Return Promise if callback not supplied 
+      return new Promise((resolve, reject) => {
+        this.callAPI(sID, 'csgoStats', (err, d7) => {
+          if (err) return reject(err);
+          return resolve(d7);
         })
       });
+    }
+  }
+
+  // Updated to a new Promise Overloading Function
+  getProfile(sID, cb) {
+    if (typeof cb === 'function') {
+      // Callback Supplied
+      this.callAPI(sID, "getProfile", (err, data) => {
+        if (err) return cb(err, null);
+        return cb(null, data['response']['players'][0]);
+      });
     } else {
-      this.makePost(steamID, "getBans" , (data) => {
-        cb(data['players'][0]);
+      // Return Promise if callback not supplied 
+      return new Promise((resolve, reject) => {
+        this.callAPI(sID, "getProfile", (err, data) => {
+          if (err) return reject(err);
+          return resolve(data['response']['players'][0]);
+        });
       });
     }
   }
 
-  isVac(steamID, cb){
-    if(vanity){
-      this.getMySteamID(steamID, (sID) => {
-        this.getMyBans(sID, (data) => {
-          if(data['VACBanned'] == true){
-            if(quiet == 0){
-              cb("You are currently VAC Banned");
-            } else {
-              cb(1); //Quiet Mode Callback
-              return;
-            }
-          } else {
-            if(quiet == 0){
-              cb("You are currently not VAC Banned");
-            } else {
-              cb(0); //Quiet Mode Callback
-              return;
-            }
-          }
-        });
+  getProfilePic(sID, cb) {
+    if (typeof cb === 'function') {
+      this.getProfile(sID, (err, data) => {
+        if (err) return cb(err, null);
+        return cb(null, data['avatarfull']);
       });
     } else {
-      this.getMyBans(steamID, (data) => {
-        if(data['VACBanned'] == true){
-          if(quiet == 0){
-            cb("You are currently VAC Banned");
-          } else {
-            cb(1); //Quiet Mode Callback
-          }
+      return new Promise((resolve, reject) => {
+        this.getProfile(sID, (err, data) => {
+          if (err) return reject(err);
+          return resolve(data['avatarfull']);
+        });
+      });
+    }
+  }
+
+  // Get Profile Name
+  getProfileName(sID, cb) {
+    if (typeof cb === 'function') {
+      this.getProfile(sID, (err, data) => {
+        if (err) return cb(err, null);
+        return cb(null, data['personaname']);
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        this.getProfile(sID, (err, data) => {
+          if (err) return reject(err);
+          return resolve(data['personaname']);
+        });
+      });
+    }
+  }
+
+  // Calculate KD and return the number
+  getKD(kills, deaths) {
+    let kd = (kills / deaths).toFixed(2);
+    return kd;
+  }
+
+  // Will Return a Steam64 ID if a valid URL is supplied,
+  // otherwise it will return the same input back.
+  getSteamID(vanityURL, cb) {
+    if (typeof cb === 'function') {
+      this.callAPI(vanityURL, "vanityURL", (err, data) => {
+        if (err) return cb(err, null);
+        return cb(null, data['response']['steamid']);
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        this.callAPI(vanityURL, "vanityURL", (err, data) => {
+          if (err) return reject(err);
+          return resolve(data['response']['steamid']);
+        });
+      });
+    }
+  }
+
+  getBans(sID, cb) {
+    if (typeof cb === 'function') {
+      this.callAPI(sID, "getBans", (err, data) => {
+        if (err) return cb(err, null);
+        return cb(null, data['players'][0]);
+      })
+    } else {
+      return new Promise((resolve, reject) => {
+        this.callAPI(sID, "getBans", (err, data) => {
+          if (err) return reject(err);
+          return resolve(data['players'][0]);
+        })
+      });
+    }
+  }
+
+  hasVac(sID, cb) {
+    if (typeof cb === 'function') {
+      this.getMyBans(sID, (err, data) => {
+        if (err) return cb(err, null);
+        if (data['VACBanned'] == true) {
+          return cb(null, true);
         } else {
-          if(quiet == 0){
-            cb("You are currently not VAC Banned");
-          } else {
-            cb(0); //Quiet Mode Callback
-          }
+          return cb(null, false);
         }
       });
+    } else {
+      return new Promise((resolve, reject) => {
+        this.getMyBans(sID, (err, data) => {
+          if (err) return reject(err);
+          if (data['VACBanned'] == true) {
+            return resolve(true);
+          } else {
+            return resolve(false);
+          }
+        });
+      });
     }
   }
 
-  ping(cb){
-    cb('pong');
-  }
 }
 
 module.exports = csgoStatsNode;

@@ -1,6 +1,6 @@
 [![npm version](https://badge.fury.io/js/csgostatsnode.svg)](https://badge.fury.io/js/csgostatsnode)
 [![Downloads][downloads-image]][npm-url]
-[![GitHub issues](https://img.shields.io/github/issues/KillerDucks/csgoStats.svg)](https://github.com/KillerDucks/csgoStats/issues)
+[![GitHub issues](https://img.shields.io/github/issues/GameTrackerApp/csgoStats.svg)](https://github.com/GameTrackerApp/csgoStats/issues)
 
 # CSGO NodeJS wrapper V2
 

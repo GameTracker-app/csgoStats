@@ -2,9 +2,9 @@
 [![Downloads][downloads-image]][npm-url]
 [![GitHub issues](https://img.shields.io/github/issues/KillerDucks/csgoStats.svg)](https://github.com/KillerDucks/csgoStats/issues)
 
-# CSGO NodeJS wrapper
+# CSGO NodeJS wrapper V2
 
-A nodeJS lib to provide CSGO Player stats.
+A nodeJS lib to provide CSGO Player stats V2.
 
 ## Getting Started
 

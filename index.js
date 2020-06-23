@@ -52,7 +52,6 @@ class csgoStatsNode {
           needle.get('http://api.steampowered.com/ISteamUser/ResolveVanityURL/v0001/?key=' + APIKey + '&vanityurl=' + steamID, function (err, resp) {
             if (err) return cb(err);
             if (resp.statusCode === 200) {
-              console.log(resp.body);
               if (resp.body.response.success === 42) {
                 return cb(new Error('Invalid VanityURL'));
               }
